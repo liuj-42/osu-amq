@@ -26,7 +26,12 @@ app.listen( PORT, () => {
   console.log(`server up on http://localhost:${PORT}`);
 })
 
-app.get("/", function (req, res) {
+// app.get("/", function (req, res) {
+//   // console.log("yeah")
+//   res.sendFile(path.join(__dirname, "./site/dist/index.html"));
+// });
+
+app.get("/index", function (req, res) {
   // console.log("yeah")
   res.sendFile(path.join(__dirname, "./site/dist/index.html"));
 });
@@ -59,7 +64,11 @@ app.get("/callback", async (req, res) => {
 
   response = await response.json();
 
-  res.status(200).send(response);
+  // redirect to index and then store stuff
+  // res.status(200).send()
+  res.redirect(`https://localhost:5000/index?logged_in=true`)
+
+  // res.status(200).send(response);
 })
 
 async function main() {
