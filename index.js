@@ -51,8 +51,14 @@ app.get("/auth", (req, res) => {
 app.get("/callback", async (req, res) => {
   const receivedCode = req.query.code;
 
-  const data = `client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${receivedCode}&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fcallback` 
-
+  // const data = `client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${receivedCode}&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fcallback` 
+  const data = new URLSearchParams({
+    client_id: process.env.CLIENT_ID,
+    client_secret: process.env.CLIENT_SECRET,
+    code: receivedCode,
+    grant_type: "authorization_code",
+    redirect_uri: "http%3A%2F%2Flocalhost%3A5000%2Fcallback"
+  })
   let response = await fetch("https://osu.ppy.sh/oauth/token", {
     method: "POST",
     headers: {
@@ -66,7 +72,10 @@ app.get("/callback", async (req, res) => {
 
   // redirect to index and then store stuff
   // res.status(200).send()
-  res.redirect(`https://localhost:5000/index?logged_in=true`)
+  res.redirect(`/index?` + new URLSearchParams({
+    logged_in: true,
+
+  }))
 
   // res.status(200).send(response);
 })
