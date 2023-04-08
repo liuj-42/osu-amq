@@ -4,14 +4,13 @@
 </script>
 
 <div class="app">
-	<Header />
-
 	<main>
 		<slot />
 	</main>
 
 	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
+		<p>view this site on <a href="https://github.com/liuj-42/osu-amq">github</a>		
+		</p>
 	</footer>
 </div>
 
