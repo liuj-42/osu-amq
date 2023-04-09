@@ -1,31 +1,54 @@
 <script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+    import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+    
+    let loggedIn = false;
+	
+	let userInfo = {};
+
+	onMount(async () => {
+		loggedIn = $page.url.searchParams.has('loggedIn')
+		if (loggedIn) {
+			localStorage.setItem('loggedIn', 'true');
+			userInfo = await fetch("http://localhost:5000/userInfo")
+				.then(res => res.json())
+			console.log("got userinfo, ", userInfo)
+		} 
+	})
+
+	function handleClick() {
+		window.location = "http://localhost:5000/auth";
+	}
 </script>
 
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<meta name="description" content="osu amq site" />
 </svelte:head>
 
 <section>
 	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
-
-		to your new<br />SvelteKit app
+		osu music quiz
 	</h1>
+	<!-- log in or play as guest -->
+	<div>
+		{#if loggedIn}
+			<h1>
+				you are logged in!
+			</h1>
+		{:else}
+			<button on:click={handleClick}>
+				log in
+			</button>
+		{/if}
+		<!--! not iplemented -->
+		<!-- <button on:click={handleClick}>
+			play as guest
+		</button> -->
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
+	</div>
 
-	<Counter />
+
 </section>
 
 <style>
@@ -39,21 +62,5 @@
 
 	h1 {
 		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
 	}
 </style>

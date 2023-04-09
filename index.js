@@ -2,22 +2,24 @@ const path = require("path");
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 const cors = require("cors");
-var favicon = require("serve-favicon");
-// const { v2, auth } = require("osu-api-extended");
+
+
+require("dotenv").config();
 
 app
   .use(bodyParser.urlencoded({ extended: true }))
   .use(bodyParser.json())
-  .use(express.static(path.join(__dirname, "site", "dist")))
+  .use(express.static(path.join(__dirname, "site", "build")))
   .use(cors())
+  .use(cookieParser())
   .use(function (req, res, next) {
     res.setHeader("Access-Control-Allow-Origin", "*");
     next();
   })
-  .use(favicon(path.join(__dirname, "site", "public", "vite.svg")));
 
-require("dotenv").config();
+
 
 const PORT = process.env.PORT || 5000;
 
@@ -47,18 +49,13 @@ app.get("/auth", (req, res) => {
     response_type: "code",
   }))
 })
-
+let userInfo = {};
+let loggedIn = false;
 app.get("/callback", async (req, res) => {
   const receivedCode = req.query.code;
 
-  // const data = `client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${receivedCode}&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fcallback` 
-  const data = new URLSearchParams({
-    client_id: process.env.CLIENT_ID,
-    client_secret: process.env.CLIENT_SECRET,
-    code: receivedCode,
-    grant_type: "authorization_code",
-    redirect_uri: "http%3A%2F%2Flocalhost%3A5000%2Fcallback"
-  })
+  const data = `client_id=${process.env.CLIENT_ID}&client_secret=${process.env.CLIENT_SECRET}&code=${receivedCode}&grant_type=authorization_code&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Fcallback` 
+
   let response = await fetch("https://osu.ppy.sh/oauth/token", {
     method: "POST",
     headers: {
@@ -70,14 +67,37 @@ app.get("/callback", async (req, res) => {
 
   response = await response.json();
 
+  console.log(response)
   // redirect to index and then store stuff
   // res.status(200).send()
-  res.redirect(`/index?` + new URLSearchParams({
-    logged_in: true,
+  userInfo = response;
+  const accessToken = response.access_token;
+  res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+  res.cookie('loggedIn', true, { httpOnly: true, secure: true });
+
+  loggedIn = true;
+  res.redirect(`/?` + new URLSearchParams({
+    loggedIn: true,
 
   }))
 
   // res.status(200).send(response);
+})
+
+app.get("/userInfo", (req, res) => {
+  res.status(200).send(userInfo);
+})
+
+app.get("/loggedIn", (req, res) => {
+  // res.status(200).send(loggedIn);
+  const loggedIn = req.cookies.loggedIn;
+
+  // if (!loggedIn) {
+  //   // If the access token is not present or expired, send an unauthorized response
+  //   res.status(401).send('Unauthorized');
+  //   return;
+  // }
+  res.status(200).send(loggedIn);
 })
 
 async function main() {
