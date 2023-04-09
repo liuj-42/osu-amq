@@ -5,14 +5,25 @@
     let loggedIn = false;
 	
 	let userInfo = {};
+	let ready = false;
 
 	onMount(async () => {
-		loggedIn = $page.url.searchParams.has('loggedIn')
+		loggedIn = await fetch("http://localhost:5000/loggedIn")
+			.then(res => res.json())
+			.then(data => { return data })
 		if (loggedIn) {
-			localStorage.setItem('loggedIn', 'true');
-			userInfo = await fetch("http://localhost:5000/userInfo")
+			// send a request to get the users info from the /me endpoint
+			await fetch("http://localhost:5000/me")
 				.then(res => res.json())
-			console.log("got userinfo, ", userInfo)
+				.then(data => {
+					console.log("got data from /me, ", data)
+					userInfo = JSON.parse(JSON.stringify(data));
+					ready = true;
+				})
+
+			await fetch("http://localhost:5000/userInfo")
+			.then(res => res.json())
+			.then(data => { console.log("got userinfo, ", data); })
 		} 
 	})
 
@@ -32,10 +43,14 @@
 	</h1>
 	<!-- log in or play as guest -->
 	<div>
-		{#if loggedIn}
+		{#if loggedIn && ready}
 			<h1>
 				you are logged in!
 			</h1>
+			{#if ready}
+				<p>your username is {userInfo.username}</p>
+				<img src={userInfo.avatar_url} alt="avatar" />
+			{/if}
 		{:else}
 			<button on:click={handleClick}>
 				log in

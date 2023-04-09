@@ -100,6 +100,25 @@ app.get("/loggedIn", (req, res) => {
   res.status(200).send(loggedIn);
 })
 
+app.get("/me", async (req, res) => {
+  const loggedIn = req.cookies.loggedIn;
+  if (!loggedIn) {
+    // If the access token is not present or expired, send an unauthorized response
+    res.status(401).send('Unauthorized');
+    return;
+  }
+  const accessToken = req.cookies.accessToken;
+  let response = await fetch("https://osu.ppy.sh/api/v2/me", { 
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": "Bearer " + accessToken
+    }
+  })
+  response = await response.json();
+  res.status(200).send(response);
+});
+
 async function main() {
   // get auth
   let test = await fetch("https://osu.ppy.sh/oauth/authorize" + new URLSearchParams({
