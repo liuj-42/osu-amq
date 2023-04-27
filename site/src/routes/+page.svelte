@@ -20,10 +20,6 @@
 					userInfo = JSON.parse(JSON.stringify(data));
 					ready = true;
 				})
-
-			await fetch("http://localhost:5000/userInfo")
-			.then(res => res.json())
-			.then(data => { console.log("got userinfo, ", data); })
 		} 
 	})
 

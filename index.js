@@ -43,8 +43,6 @@ app.get("/auth", (req, res) => {
     response_type: "code",
   }))
 })
-let userInfo = {};
-let loggedIn = false;
 app.get("/callback", async (req, res) => {
   const receivedCode = req.query.code;
 
@@ -61,7 +59,6 @@ app.get("/callback", async (req, res) => {
 
   response = await response.json();
 
-  userInfo = response;
   const accessToken = response.access_token;
   res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
   res.cookie('loggedIn', true, { httpOnly: true, secure: true });
@@ -71,10 +68,6 @@ app.get("/callback", async (req, res) => {
     loggedIn: true,
 
   }))
-})
-
-app.get("/userInfo", (req, res) => {
-  res.status(200).send(userInfo);
 })
 
 app.get("/loggedIn", (req, res) => {
