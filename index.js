@@ -15,9 +15,12 @@ app
   .use(cors())
   .use(cookieParser())
   .use(function (req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5000");
+    res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+    res.header("Access-Control-Allow-Credentials", true);
     next();
   })
+  
 
 
 
@@ -62,17 +65,20 @@ app.get("/callback", async (req, res) => {
   const accessToken = response.access_token;
   res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
   res.cookie('loggedIn', true, { httpOnly: true, secure: true });
-
   loggedIn = true;
-  res.redirect(`/?` + new URLSearchParams({
+  res.redirect(`${process.env.SITE_URL}#/play/?` + new URLSearchParams({
     loggedIn: true,
-
   }))
 })
 
 app.get("/loggedIn", (req, res) => {
+
   const loggedIn = req.cookies.loggedIn;
-  res.status(200).send(loggedIn);
+  if ( loggedIn ) {
+    res.status(200).send(true)
+  } else {
+    res.status(400).send(false)
+  }
 })
 
 app.get("/me", async (req, res) => {
